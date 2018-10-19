@@ -59,11 +59,19 @@ ggplot(ms_byState, aes(x=ms_byState$Var1, y=ms_byState$Freq)) + xlab("State") + 
 #Get all mass shooting data for California
 ms_California <- mass_shootings[mass_shootings$State=="California",]
 
+
 #Get count of mass shootings in California by year
 ms_CaliforniaByYear <- as.data.frame(table(ms_California$Year))
 
 #Plot graph of Mass shootings in california by year
 ggplot(ms_CaliforniaByYear, aes(x=ms_CaliforniaByYear$Var1, y=ms_CaliforniaByYear$Freq)) + xlab("Year") + ylab("Count") + geom_bar(stat = "Identity", fill="goldenrod", col="blue") + theme(title = element_text(hjust = 0.5)) + ggtitle("Mass Shootings in California (2014-2016)")
+
+
+ms_CaliforniaByMonth <- as.data.frame(table(ms_California$Month, ms_California$Year))
+colnames(ms_CaliforniaByMonth)[1] <- "Month"
+colnames(ms_CaliforniaByMonth)[2] <- "Year"
+
+ggplot(ms_CaliforniaByMonth, aes(x=ms_CaliforniaByMonth$Month, y=ms_CaliforniaByMonth$Freq, fill=ms_CaliforniaByMonth$Year)) + xlab("Month") + ylab("Count") + geom_bar(position = "dodge", stat = "Identity") + theme(title = element_text(hjust = 0.5)) + ggtitle("Mass Shootings in California by Month")
 
 #Get # Mass Shooting incidents in each state for each year from 2014-2016
 ms_State_Year <- as.data.frame(table(mass_shootings$State, mass_shootings$Year))
@@ -82,6 +90,15 @@ mass_shootings$Day <- factor(day(as.POSIXct(mass_shootings$Incident.Date, format
 mass_shootings$Month <- factor(month(as.POSIXct(mass_shootings$Incident.Date, format = "%B %d, %Y"), label = TRUE))
 mass_shootings$Year <- factor(year(as.POSIXct(mass_shootings$Incident.Date, format = "%B %d, %Y")))
 mass_shootings$Weekday <- factor(wday(as.POSIXct(mass_shootings$Incident.Date, format = "%B %d, %Y"), label = TRUE))
+
+ms_mths <- as.data.frame(table(mass_shootings$Month, mass_shootings$Year))
+head(ms_mths)
+colnames(ms_mths)[1]<- "Month"
+colnames(ms_mths)[2]<- "Year"
+
+ggplot(ms_mths, aes(y=Freq, x=Month, fill=Year)) + geom_bar(position = "dodge", stat = "Identity") + theme(axis.text.x = element_text(angle = 45), title = element_text(hjust = 0.5)) + ggtitle("Mass Shootings in Monthly (2014-2016)") + xlab("Months") + ylab("Count")
+
+
 
 #Get sum of people killed in mass shootings by month and year 
 ms_month_year <- mass_shootings %>%
@@ -119,6 +136,7 @@ colnames(ms_ByDate)[1] <- "Date"
 #Plot a line chart depicting the # people injured & killed during all mass shooting incident
 plot(gvisLineChart(ms_ByDate, xvar = 'Date', yvar = c("TotalInjured", "TotalKilled"), options(list(title="# Killed and Injured in Mass Shootings (2014 -2016)", titleTextStyle="{color:'red',fontName:'Courier',fontSize:16}", curveType='function'))))
 
+mass_shootings[mass_shootings$Incident.Date == "June 12, 2016",]
 
 #Get # people killed due to mass shooting in each state
 state_killed <- mass_shootings %>% group_by(mass_shootings$State) %>% dplyr::summarize(Killed = sum(X..Killed))
